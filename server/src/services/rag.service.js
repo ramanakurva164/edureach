@@ -27,7 +27,7 @@ const getMongoClient = async () => {
 // ---- Google GenAI Embeddings ----
 const getEmbeddings = () => {
     if (!process.env.GOOGLE_API_KEY) {
-        throw new Error("GOOGLE_API_KEY is not set in .env!");
+        throw new Error("GOOGLE_API_KEY is not set in environment variables.");
     }
     return new GoogleGenerativeAIEmbeddings({
         apiKey: process.env.GOOGLE_API_KEY,
