@@ -1,4 +1,4 @@
-const BASE_URL = "http://localhost:5000/api";
+const BASE_URL = "https://edureach-mlmz.onrender.com";
 async function request(endpoint, options = {}) {
     const url = `${BASE_URL}${endpoint}`;
     const config = {
