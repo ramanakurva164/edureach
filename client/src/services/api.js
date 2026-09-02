@@ -1,17 +1,22 @@
-const BASE_URL = "https://edureach-mlmz.onrender.com";
+const BASE_URL = import.meta.env.API_URL || "https://edureach-mlmz.onrender.com";
+
 async function request(endpoint, options = {}) {
     const url = `${BASE_URL}${endpoint}`;
     const config = {
         headers: { "Content-Type": "application/json" },
         ...options,
     };
+
     const response = await fetch(url, config);
-    const data = await response.json();
+    const data = await response.json().catch(() => ({}));
+
     if (!response.ok) {
-        throw new Error(data.error || "Request failed");
+        throw new Error(data.error || data.message || "Request failed");
     }
+
     return data;
 }
+
 export const api = {
   post: (endpoint, body) =>
     request(endpoint, { method: "POST", body: JSON.stringify(body) }),
