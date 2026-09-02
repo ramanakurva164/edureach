@@ -128,15 +128,22 @@ export const initializeKnowledgeBase = async () => {
 // B) RAG RESPONSE — runs on every chat query
 // ============================================
 export const getRAGResponse = async (question) => {
+    console.log("[RAG] Starting retrieval for question:", question);
+
     try {
         const vectorStore = await getVectorStore();
+        console.log("[RAG] Vector store connected.");
+
         const retrievedDocs = await vectorStore.similaritySearch(question, 3);
+        console.log("[RAG] Retrieved docs count:", retrievedDocs.length);
 
         if (retrievedDocs.length === 0) {
+            console.log("[RAG] No docs found for the query.");
             return "I don't have that information right now. Please contact the college office for assistance.";
         }
 
         const context = retrievedDocs.map(doc => doc.pageContent).join("\n\n");
+        console.log("[RAG] Context length:", context.length);
 
         const model = new ChatGoogleGenerativeAI({
             model: "gemini-2.5-flash",
@@ -144,14 +151,22 @@ export const getRAGResponse = async (question) => {
             apiKey: process.env.GOOGLE_API_KEY,
         });
 
+        console.log("[RAG] Calling Gemini with model gemini-2.5-flash");
         const result = await model.invoke([
             { role: "system", content: `You are EduReach Bot. Answer based on this context:\n\n${context}` },
             { role: "user", content: question }
         ]);
 
+        console.log("[RAG] Gemini response received.");
         return result.content;
     } catch (error) {
-        console.error(`[RAG] EXCEPTION: ${error.message}`);
+        console.error("[RAG] EXCEPTION:", {
+            message: error.message,
+            stack: error.stack,
+            question,
+            GOOGLE_API_KEY_SET: !!process.env.GOOGLE_API_KEY,
+            MONGODB_URI_SET: !!process.env.MONGODB_URI,
+        });
         return "I'm having trouble right now. Please try again or contact the college office for assistance.";
     }
 };
